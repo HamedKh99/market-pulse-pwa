@@ -11,9 +11,8 @@
 ![Socket.io](https://img.shields.io/badge/Socket.io-4-010101?logo=socketdotio)
 ![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?logo=pwa)
 
-<!-- Replace with an actual screenshot -->
 <p align="center">
-  <img src="docs/screenshot.png" alt="Market Pulse Dashboard" width="900" />
+  <img src="./public/screenshots/preview.jpg" alt="Market Pulse Dashboard" width="900" />
 </p>
 
 ---
