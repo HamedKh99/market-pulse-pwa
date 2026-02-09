@@ -11,9 +11,10 @@ interface OfflineCache {
 }
 
 /**
- * Persist a snapshot of current market data to localStorage.
- * Called periodically (every 5 seconds) from the DataProvider,
- * NOT on every tick — avoids thrashing localStorage.
+ * Persist a market snapshot to `localStorage`.
+ *
+ * Deliberately throttled to a 5 s cadence in the DataProvider
+ * (not per-tick) to avoid synchronous I/O pressure on the main thread.
  */
 export function saveOfflineSnapshot(data: Omit<OfflineCache, "timestamp">): void {
   try {
@@ -23,8 +24,7 @@ export function saveOfflineSnapshot(data: Omit<OfflineCache, "timestamp">): void
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch {
-    // localStorage might be full — silently fail
-    console.warn("[OfflineCache] Failed to save snapshot");
+    console.warn("[OfflineCache] Failed to save snapshot — localStorage may be full");
   }
 }
 

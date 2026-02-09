@@ -1,6 +1,13 @@
+/**
+ * Discriminated-union message protocol for the Main ↔ Worker boundary.
+ *
+ * Using tagged unions guarantees exhaustive type-checking in the Worker's
+ * `switch` and avoids stringly-typed event buses.
+ */
+
 import type { RawTick, Timeframe, TickData, Candle, SparklineData } from "@/types/market";
 
-// ─── Messages: Main Thread → Worker ─────────────────────────────────────────
+/** Main thread → Worker */
 export type MainToWorkerMessage =
   | { type: "TICK"; payload: RawTick }
   | { type: "BATCH_TICKS"; payload: RawTick[] }
@@ -9,7 +16,7 @@ export type MainToWorkerMessage =
   | { type: "UNSUBSCRIBE"; payload: string[] }
   | { type: "INIT_SNAPSHOT"; payload: Record<string, { price: number; volume24h: number; change24h: number; high24h: number; low24h: number }> };
 
-// ─── Messages: Worker → Main Thread ─────────────────────────────────────────
+/** Worker → Main thread */
 export type WorkerToMainMessage =
   | {
       type: "BATCH_UPDATE";

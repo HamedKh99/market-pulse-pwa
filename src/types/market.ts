@@ -1,4 +1,3 @@
-// ─── Timeframe ───────────────────────────────────────────────────────────────
 export type Timeframe = "1m" | "5m" | "15m" | "1h" | "1D";
 
 export const TIMEFRAMES: Timeframe[] = ["1m", "5m", "15m", "1h", "1D"];
@@ -11,7 +10,7 @@ export const TIMEFRAME_MS: Record<Timeframe, number> = {
   "1D": 86_400_000,
 };
 
-// ─── Raw Tick (from server) ──────────────────────────────────────────────────
+/** Wire format: the minimal tick payload emitted by the Socket.io server. */
 export interface RawTick {
   symbol: string;
   price: number;
@@ -21,7 +20,7 @@ export interface RawTick {
   timestamp: number;
 }
 
-// ─── Processed Tick (after Worker aggregation) ───────────────────────────────
+/** Enriched tick produced by the Worker — includes derived fields (spread, Δ%, direction). */
 export interface TickData {
   symbol: string;
   price: number;
@@ -38,7 +37,6 @@ export interface TickData {
   direction: "up" | "down" | "neutral";
 }
 
-// ─── OHLC Candle ─────────────────────────────────────────────────────────────
 export interface Candle {
   time: number;
   open: number;
@@ -48,7 +46,6 @@ export interface Candle {
   volume: number;
 }
 
-// ─── Symbol Configuration ────────────────────────────────────────────────────
 export interface SymbolConfig {
   symbol: string;
   name: string;
@@ -58,10 +55,9 @@ export interface SymbolConfig {
   category: "crypto" | "forex" | "commodity";
 }
 
-// ─── Sparkline Data ──────────────────────────────────────────────────────────
 export type SparklineData = number[];
 
-// ─── Market Snapshot (initial state from server) ─────────────────────────────
+/** Server-side snapshot sent on initial connection for instant first paint. */
 export interface MarketSnapshot {
   [symbol: string]: {
     price: number;

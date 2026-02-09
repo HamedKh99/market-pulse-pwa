@@ -40,7 +40,6 @@ export function SymbolSidebar({ isMobile = false }: SymbolSidebarProps) {
 
   const handleSymbolClick = (symbol: string) => {
     setSelectedSymbol(symbol);
-    // Auto-close sidebar on mobile after selection
     if (isMobile) toggleSidebar();
   };
 
@@ -51,7 +50,6 @@ export function SymbolSidebar({ isMobile = false }: SymbolSidebarProps) {
         isMobile ? "h-screen w-72" : "h-full w-64"
       )}
     >
-      {/* Mobile close button */}
       {isMobile && (
         <div className="flex items-center justify-between border-b border-sidebar-border px-3 py-2">
           <span className="text-sm font-semibold text-foreground">Watchlist</span>
@@ -68,7 +66,6 @@ export function SymbolSidebar({ isMobile = false }: SymbolSidebarProps) {
         </div>
       )}
 
-      {/* Search */}
       <div className="border-b border-sidebar-border p-3">
         <div className="relative">
           <svg
@@ -95,7 +92,6 @@ export function SymbolSidebar({ isMobile = false }: SymbolSidebarProps) {
         </div>
       </div>
 
-      {/* Category Tabs */}
       <div className="flex gap-1 border-b border-sidebar-border px-3 py-2 overflow-x-auto">
         {CATEGORIES.map((cat) => (
           <button
@@ -113,7 +109,6 @@ export function SymbolSidebar({ isMobile = false }: SymbolSidebarProps) {
         ))}
       </div>
 
-      {/* Symbol List */}
       <div className="flex-1 overflow-y-auto">
         {filteredSymbols.map((sym) => {
           const tick = prices[sym.symbol];
@@ -170,7 +165,6 @@ export function SymbolSidebar({ isMobile = false }: SymbolSidebarProps) {
         )}
       </div>
 
-      {/* Footer */}
       <div className="border-t border-sidebar-border px-3 py-2">
         <span className="text-xs text-muted-foreground">
           {filteredSymbols.length} symbols

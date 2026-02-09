@@ -8,9 +8,17 @@ import type { ServerToClientEvents, ClientToServerEvents } from "@/types/socket"
 type MarketSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 /**
- * Manages the Socket.io connection lifecycle.
- * Connects to the /market namespace on mount, disconnects on unmount.
- * Passes incoming ticks to the Web Worker via the provided callback.
+ * Manages the Socket.io connection lifecycle for the `/market` namespace.
+ *
+ * Handles connect / disconnect / reconnect state transitions and
+ * delegates incoming ticks to the caller via `onTick` (typically
+ * piped straight into the Web Worker by the DataProvider).
+ *
+ * @param onTick - Optional callback invoked on every raw tick.
+ *                 Kept as a parameter (rather than imported) to
+ *                 decouple the transport layer from processing.
+ * @returns `subscribe` / `unsubscribe` helpers for room-based filtering
+ *          and a ref to the underlying socket instance.
  */
 export function useSocket(onTick?: (tick: import("@/types/market").RawTick) => void) {
   const socketRef = useRef<MarketSocket | null>(null);
@@ -19,6 +27,8 @@ export function useSocket(onTick?: (tick: import("@/types/market").RawTick) => v
   const setSymbols = useStore((s) => s.setSymbols);
 
   useEffect(() => {
+    // Prefer WebSocket for lower latency; fall back to long-polling
+    // behind corporate proxies that strip Upgrade headers.
     const socket: MarketSocket = io("/market", {
       transports: ["websocket", "polling"],
       reconnection: true,
@@ -43,18 +53,14 @@ export function useSocket(onTick?: (tick: import("@/types/market").RawTick) => v
       setConnectionStatus("connecting");
     });
 
-    // Handle initial snapshot
     socket.on("snapshot", (snapshot) => {
       console.log(`[Socket] Received snapshot: ${Object.keys(snapshot).length} symbols`);
-      // The snapshot will be forwarded to the Worker via useTickWorker
     });
 
-    // Handle symbols list
     socket.on("symbols", (symbols) => {
       setSymbols(symbols);
     });
 
-    // Handle incoming ticks
     socket.on("tick", (tick) => {
       setLastUpdateTimestamp(tick.timestamp);
       onTick?.(tick);

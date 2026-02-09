@@ -8,12 +8,13 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 /**
- * Hook to manage the PWA install prompt lifecycle.
+ * PWA install prompt lifecycle manager.
  *
- * Captures the `beforeinstallprompt` event and exposes:
- * - `canInstall`: whether the prompt is available
- * - `isInstalled`: whether the app is already installed
- * - `promptInstall`: triggers the native install dialog
+ * Captures the browser's `beforeinstallprompt` event (deferred) and
+ * surfaces it through a React-friendly API. Detects standalone mode
+ * so the prompt is suppressed when the app is already installed.
+ *
+ * @returns `canInstall` / `isInstalled` booleans and action callbacks.
  */
 export function usePWAInstall() {
   const [canInstall, setCanInstall] = useState(false);
@@ -21,7 +22,6 @@ export function usePWAInstall() {
   const deferredPromptRef = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    // Check if already installed (standalone mode)
     if (window.matchMedia("(display-mode: standalone)").matches) {
       setIsInstalled(true);
       return;

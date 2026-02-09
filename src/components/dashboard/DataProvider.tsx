@@ -12,12 +12,18 @@ import type { RawTick, MarketSnapshot, SymbolConfig } from "@/types/market";
 type MarketSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 /**
- * DataProvider — The central orchestrator that wires:
- *   Socket.io (real-time ticks) → Web Worker (processing) → Zustand (state)
+ * DataProvider — Central orchestrator wiring the real-time data pipeline:
  *
- * Also handles:
- *   - Offline cache: periodically snapshots prices to localStorage
- *   - Offline restore: loads cached data when offline on boot
+ *   Socket.io  →  Web Worker (off-thread parsing)  →  Zustand (single store)
+ *
+ * ### Offline resilience
+ * - Snapshots the full price map to `localStorage` every 5 s (debounced,
+ *   NOT per-tick — avoids storage I/O thrashing).
+ * - On boot, if the browser is offline, hydrates the store from the most
+ *   recent snapshot so the UI renders immediately with stale-but-useful data.
+ *
+ * This component deliberately renders no DOM of its own — it is a pure
+ * side-effect boundary, keeping data concerns out of presentational trees.
  */
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const socketRef = useRef<MarketSocket | null>(null);
@@ -29,12 +35,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const setSymbols = useStore((s) => s.setSymbols);
   const timeframe = useStore((s) => s.timeframe);
 
-  // ── Sync timeframe changes to the Worker ──────────────────────
+  // Propagate timeframe to the Worker so it re-buckets candles.
   useEffect(() => {
     setWorkerTimeframe(timeframe);
   }, [timeframe, setWorkerTimeframe]);
 
-  // ── Load offline cache on boot if offline ─────────────────────
+  // Hydrate from localStorage when the app boots without connectivity.
   useEffect(() => {
     if (!isOnline) {
       const cached = loadOfflineSnapshot();
@@ -50,7 +56,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isOnline, setLastUpdateTimestamp]);
 
-  // ── Periodic offline snapshot (every 5 seconds) ───────────────
+  // Periodic localStorage snapshot — 5 s interval balances freshness
+  // vs. I/O cost (writing 50-symbol JSON is ~15 KB).
   useEffect(() => {
     const interval = setInterval(() => {
       const state = useStore.getState();
@@ -67,7 +74,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, []);
 
-  // ── Socket.io connection lifecycle ────────────────────────────
+  // Socket.io lifecycle — auto-reconnect with exponential back-off.
   useEffect(() => {
     if (!isOnline) {
       setConnectionStatus("disconnected");

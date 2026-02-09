@@ -13,7 +13,7 @@ export function StatusBar() {
   const isOnline = useOnlineStatus();
   const [, setTick] = useState(0);
 
-  // Force re-render every second to update relative time
+  // 1 Hz tick so the "Xs ago" label stays current without WebSocket dependency.
   useEffect(() => {
     const interval = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(interval);
@@ -21,7 +21,6 @@ export function StatusBar() {
 
   return (
     <footer className="flex h-7 items-center justify-between border-t border-border bg-status-bar px-3 sm:px-4 transition-theme">
-      {/* Left */}
       <div className="flex items-center gap-3 sm:gap-4">
         <div className="flex items-center gap-1.5">
           <div
@@ -46,7 +45,6 @@ export function StatusBar() {
         </span>
       </div>
 
-      {/* Right */}
       <div className="flex items-center gap-3 sm:gap-4">
         {lastUpdateTimestamp > 0 && (
           <span className="text-xs text-muted-foreground hidden sm:inline">

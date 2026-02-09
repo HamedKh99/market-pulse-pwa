@@ -26,7 +26,6 @@ export function LoginForm() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
-        {/* Logo & Title */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/10">
             <svg
@@ -47,7 +46,6 @@ export function LoginForm() {
           </p>
         </div>
 
-        {/* Login Card */}
         <div className="rounded-xl border border-border bg-card p-6 shadow-lg">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -138,7 +136,6 @@ export function LoginForm() {
             </button>
           </form>
 
-          {/* Demo credentials hint */}
           <div className="mt-4 rounded-lg bg-muted px-3 py-2.5">
             <p className="text-xs font-medium text-muted-foreground">Demo credentials:</p>
             <p className="mt-1 font-mono text-xs text-foreground">

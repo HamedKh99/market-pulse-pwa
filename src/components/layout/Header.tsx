@@ -15,7 +15,6 @@ export function Header() {
 
   return (
     <header className="flex h-12 sm:h-14 items-center justify-between border-b border-header-border bg-header px-3 sm:px-4 transition-theme">
-      {/* Left: Menu + Logo */}
       <div className="flex items-center gap-2 sm:gap-3">
         <button
           onClick={toggleSidebar}
@@ -47,7 +46,6 @@ export function Header() {
           <span className="text-sm font-semibold text-foreground sm:hidden">MP</span>
         </div>
 
-        {/* Connection Status */}
         <div className="ml-1 sm:ml-2 flex items-center gap-1.5">
           <div
             className={cn(
@@ -67,9 +65,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* Right: Theme + User */}
       <div className="flex items-center gap-1.5 sm:gap-2">
-        {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
           className="rounded-lg p-1.5 sm:p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
@@ -94,7 +90,6 @@ export function Header() {
           )}
         </button>
 
-        {/* User */}
         {user && (
           <div className="flex items-center gap-1.5 sm:gap-2">
             <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-accent/10 text-xs font-medium text-accent">

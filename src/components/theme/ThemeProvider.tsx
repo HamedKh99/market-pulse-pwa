@@ -4,23 +4,20 @@ import { useEffect } from "react";
 import { useStore } from "@/store";
 
 /**
- * ThemeProvider — Hydrates theme from localStorage and syncs the
- * `dark` class on <html> for Tailwind dark mode.
- *
- * Must be mounted inside the root layout as a client component.
+ * ThemeProvider — Hydrates the theme preference from `localStorage`
+ * (falling back to `prefers-color-scheme`) and keeps the `dark` class
+ * on `<html>` in sync for Tailwind's `darkMode: 'class'` strategy.
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = useStore((s) => s.setTheme);
 
   useEffect(() => {
-    // Hydrate from localStorage or system preference
     const stored = localStorage.getItem("mp-theme") as "light" | "dark" | null;
     const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const theme = stored ?? (systemDark ? "dark" : "light");
 
     setTheme(theme);
 
-    // Listen for system preference changes
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = (e: MediaQueryListEvent) => {
       if (!localStorage.getItem("mp-theme")) {

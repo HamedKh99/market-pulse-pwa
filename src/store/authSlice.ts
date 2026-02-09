@@ -16,7 +16,7 @@ export interface AuthSlice {
   hydrate: () => void;
 }
 
-// Mock user database
+/** Stub credential store — replace with a real auth provider in production. */
 const MOCK_USERS: Record<string, { password: string; user: User }> = {
   "admin@marketpulse.io": {
     password: "admin123",
@@ -46,7 +46,6 @@ export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (set)
   isLoading: true,
 
   login: async (email: string, password: string) => {
-    // Simulate network latency
     await new Promise((r) => setTimeout(r, 800));
 
     const entry = MOCK_USERS[email.toLowerCase()];

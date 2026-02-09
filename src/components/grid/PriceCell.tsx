@@ -10,10 +10,13 @@ interface PriceCellProps {
 }
 
 /**
- * PriceCell — A table cell that flashes green/red on price changes.
+ * PriceCell — CSS-animation-driven flash indicator for price changes.
  *
- * Uses CSS animations triggered by key changes to avoid re-render storms.
- * The flash animation is defined in globals.css (flash-up / flash-down).
+ * Avoids React re-render storms: instead of toggling a state boolean
+ * that would propagate through the entire virtualized row, we apply a
+ * one-shot CSS class (`flash-up` / `flash-down`) and clear it after
+ * the 600 ms animation completes. This keeps the per-frame React
+ * work limited to a single `className` mutation on the DOM node.
  */
 export function PriceCell({ price, previousDirection = "neutral" }: PriceCellProps) {
   const prevPriceRef = useRef(price);
@@ -25,7 +28,6 @@ export function PriceCell({ price, previousDirection = "neutral" }: PriceCellPro
       setFlashClass(direction === "up" ? "flash-up" : "flash-down");
       prevPriceRef.current = price;
 
-      // Remove flash class after animation completes
       const timer = setTimeout(() => setFlashClass(""), 600);
       return () => clearTimeout(timer);
     }

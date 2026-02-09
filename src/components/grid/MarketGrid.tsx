@@ -22,12 +22,15 @@ const MOBILE_ROW_HEIGHT = 48;
 const EMPTY_SPARKLINE: readonly number[] = [];
 
 /**
- * MarketGrid — High-performance virtualized data grid.
+ * MarketGrid — Virtualized data grid rendering 50+ symbols at 60 FPS.
  *
- * Architecture:
- * - TanStack Table: Column definitions, sorting, filtering
- * - TanStack Virtual: Only renders visible rows (~15-20 of 50)
- * - Responsive: fewer columns on mobile, full set on desktop
+ * Virtualization via `@tanstack/react-virtual` ensures only ~15-20 visible
+ * rows are in the DOM at any time, avoiding layout thrashing that would
+ * otherwise occur when reconciling thousands of price-cell updates.
+ *
+ * Column set is swapped at the `sm` breakpoint — mobile gets 4 compact
+ * columns, desktop gets the full 8 — via a memoised column reference
+ * so the table instance is never re-created on resize.
  */
 export function MarketGrid() {
   const symbols = useStore((s) => s.symbols);
@@ -43,7 +46,8 @@ export function MarketGrid() {
   const parentRef = useRef<HTMLDivElement>(null);
   const rowHeight = isMobile ? MOBILE_ROW_HEIGHT : ROW_HEIGHT;
 
-  // Build row data from symbols + live prices + sparklines
+  // Merge static symbol config with live tick data. Memoised to avoid
+  // re-allocating the row array on every Zustand notification.
   const data: MarketRow[] = useMemo(() => {
     return symbols.map((sym) => ({
       symbol: sym.symbol,
@@ -55,7 +59,6 @@ export function MarketGrid() {
     }));
   }, [symbols, prices, sparklines]);
 
-  // Use fewer columns on mobile
   const columns = useMemo(
     () => (isMobile ? mobileColumns : marketColumns) as ColumnDef<MarketRow, unknown>[],
     [isMobile]
@@ -106,7 +109,6 @@ export function MarketGrid() {
         />
       </div>
 
-      {/* Table Header */}
       <div className="px-3 sm:px-4">
         <div className="flex border-b border-border py-2">
           {table.getHeaderGroups().map((headerGroup) =>
@@ -132,7 +134,7 @@ export function MarketGrid() {
         </div>
       </div>
 
-      {/* Virtualized Rows */}
+      {/* Only the visible slice is mounted — see `overscan: 5` for smooth scroll. */}
       <div
         ref={parentRef}
         className="overflow-auto px-3 sm:px-4"
@@ -179,7 +181,6 @@ export function MarketGrid() {
         </div>
       </div>
 
-      {/* Empty State */}
       {rows.length === 0 && (
         <div className="flex h-32 items-center justify-center">
           <span className="text-xs text-muted-foreground">

@@ -4,14 +4,10 @@ import type { RawTick, MarketSnapshot, SymbolConfig } from "@/types/market";
 /**
  * Geometric Brownian Motion (GBM) price simulator.
  *
- * Models realistic price movements using:
- *   dS = μ·S·dt + σ·S·dW
- *
- * Where:
- *   S = current price
- *   μ = drift (slight upward bias)
- *   σ = volatility (per-symbol)
- *   dW = Wiener process increment (random normal)
+ * Generates statistically realistic price walks using the stochastic
+ * differential equation  `dS = μ·S·dt + σ·S·dW` — the same model
+ * underlying Black-Scholes. Per-symbol volatility σ is calibrated to
+ * approximate real-world annual vol for each asset class.
  */
 
 interface SymbolState {
@@ -26,7 +22,7 @@ interface SymbolState {
   lastTimestamp: number;
 }
 
-// Box-Muller transform for generating normal distribution samples
+/** Box-Muller transform — produces N(0,1) samples from uniform randoms. */
 function randomNormal(): number {
   let u = 0;
   let v = 0;
@@ -39,7 +35,6 @@ export function createPriceEngine() {
   const states = new Map<string, SymbolState>();
   const dt = 0.1 / (365 * 24 * 3600); // 100ms in years (for annualized vol)
 
-  // Initialize all symbol states
   for (const config of SYMBOLS) {
     const spreadPct = config.category === "crypto" ? 0.001 : 0.0002;
     const halfSpread = config.basePrice * spreadPct;
@@ -66,7 +61,8 @@ export function createPriceEngine() {
     const now = Date.now();
     const ticks: RawTick[] = [];
 
-    // Each tick, ~30-60% of symbols move (realistic market behavior)
+    // ~30-60% of symbols move per tick — mimics real-world market
+    // behaviour where not all instruments update simultaneously.
     const tickRatio = 0.3 + Math.random() * 0.3;
 
     for (const [symbol, state] of states) {
@@ -76,20 +72,17 @@ export function createPriceEngine() {
       const drift = 0.0; // Neutral drift (no long-term bias)
       const vol = config.volatility;
 
-      // GBM step
       const dW = randomNormal();
       const dS = drift * state.price * dt + vol * state.price * Math.sqrt(dt) * dW;
       const newPrice = Math.max(state.price + dS, state.price * 0.001); // Floor at 0.1% of current
 
-      // Update spread (widens slightly with volatility)
+      // Spread widens proportionally to the tick's volatility shock.
       const spreadPct = config.category === "crypto" ? 0.001 : 0.0002;
       const volSpreadMultiplier = 1 + Math.abs(dW) * 0.1;
       const halfSpread = newPrice * spreadPct * volSpreadMultiplier;
 
-      // Simulate trade volume for this tick
       const tickVolume = state.volume24h * 0.00001 * (0.5 + Math.random() * 1.5);
 
-      // Update state
       state.price = newPrice;
       state.bid = newPrice - halfSpread;
       state.ask = newPrice + halfSpread;

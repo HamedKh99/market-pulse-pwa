@@ -4,14 +4,15 @@ import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { cn } from "@/lib/cn";
 
 /**
- * InstallPrompt — A subtle bottom-right toast prompting PWA installation.
- * Only shows when the browser fires `beforeinstallprompt` and the user
- * hasn't dismissed it this session.
+ * InstallPrompt — Non-intrusive PWA install CTA.
+ *
+ * Defers to the browser's `beforeinstallprompt` event and respects a
+ * per-session dismissal flag in `sessionStorage`, avoiding the dark
+ * pattern of nagging users repeatedly.
  */
 export function InstallPrompt() {
   const { canInstall, promptInstall, dismiss } = usePWAInstall();
 
-  // Respect session dismissal
   if (typeof window !== "undefined" && sessionStorage.getItem("mp-install-dismissed")) {
     return null;
   }

@@ -8,7 +8,7 @@ import { PriceCell } from "./PriceCell";
 import { MiniSparkline } from "@/components/charts/MiniSparkline";
 import { cn } from "@/lib/cn";
 
-// Extend TanStack Table ColumnMeta for our custom properties
+/** Augment TanStack Table's ColumnMeta to support our flex-grow layout. */
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData, TValue> {
@@ -16,7 +16,7 @@ declare module "@tanstack/react-table" {
   }
 }
 
-// ─── Row data shape (tick + symbol config merged) ────────────────────────────
+/** Row data shape — merges static symbol config with live tick + sparkline. */
 export interface MarketRow {
   symbol: string;
   name: string;
@@ -28,7 +28,7 @@ export interface MarketRow {
 
 const columnHelper = createColumnHelper<MarketRow>();
 
-// ─── Full desktop columns ────────────────────────────────────────────────────
+/** Full desktop column set — all 8 columns including sparkline. */
 export const marketColumns = [
   columnHelper.display({
     id: "rank",
@@ -148,7 +148,7 @@ export const marketColumns = [
   }),
 ];
 
-// ─── Compact mobile columns (fewer columns, wider symbol) ────────────────────
+/** Compact mobile column set — 4 columns with wider symbol for touch targets. */
 export const mobileColumns = [
   columnHelper.accessor("symbol", {
     header: () => <span className="text-xs font-medium text-muted-foreground">Symbol</span>,

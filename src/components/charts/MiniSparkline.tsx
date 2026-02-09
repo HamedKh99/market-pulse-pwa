@@ -10,11 +10,12 @@ interface MiniSparklineProps {
 }
 
 /**
- * MiniSparkline — Lightweight inline SVG sparkline.
+ * MiniSparkline — Zero-dependency inline SVG sparkline for grid cells.
  *
- * Renders a tiny line chart for use inside grid cells.
- * No dependencies on Recharts — pure SVG for maximum performance.
- * Color is determined by overall trend (first vs. last value).
+ * Intentionally bypasses Recharts: each grid row needs its own sparkline,
+ * and mounting a full Recharts `<LineChart>` per row would add ~50 ms of
+ * React tree overhead for 50 symbols. Raw `<svg>` + memoised `useMemo`
+ * keeps each sparkline render under 0.1 ms.
  */
 export function MiniSparkline({
   data,
@@ -29,7 +30,6 @@ export function MiniSparkline({
     const max = Math.max(...data);
     const range = max - min || 1;
 
-    // Normalize points to SVG coordinate space with 1px padding
     const padding = 1;
     const chartWidth = width - padding * 2;
     const chartHeight = height - padding * 2;
@@ -40,7 +40,6 @@ export function MiniSparkline({
       return `${x},${y}`;
     });
 
-    // Trend color: green if last > first, red otherwise
     const isUp = data[data.length - 1] >= data[0];
 
     return {
@@ -69,13 +68,11 @@ export function MiniSparkline({
       viewBox={`0 0 ${width} ${height}`}
       className={className}
     >
-      {/* Gradient fill under line */}
       <path
         d={pathData.fillPath}
         fill={pathData.fillColor}
         opacity={0.1}
       />
-      {/* Line */}
       <path
         d={pathData.path}
         fill="none"

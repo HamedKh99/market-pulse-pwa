@@ -9,11 +9,10 @@ import { MarketGrid } from "@/components/grid/MarketGrid";
 import { DataProvider } from "./DataProvider";
 
 /**
- * DashboardContent — Main content area of the dashboard.
- *
- * Wraps everything in DataProvider which manages the
- * Socket.io → Worker → Zustand pipeline. All child components
- * reactively subscribe to Zustand slices via selectors.
+ * DashboardContent — Composition root that mounts the DataProvider
+ * (Socket.io → Worker → Zustand pipeline) and renders the inner
+ * dashboard tree. Child components subscribe to Zustand slices via
+ * granular selectors, ensuring each widget re-renders independently.
  */
 export function DashboardContent() {
   return (
@@ -34,7 +33,6 @@ function DashboardInner() {
 
   return (
     <div className="flex flex-col gap-3 sm:gap-4">
-      {/* ── Symbol Header ──────────────────────────────────────────────── */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           {symbolConfig && (
@@ -93,7 +91,6 @@ function DashboardInner() {
           </div>
         </div>
 
-        {/* Timeframe Toggle */}
         <div className="flex items-center gap-0.5 sm:gap-1 rounded-lg bg-muted p-0.5 sm:p-1 self-start sm:self-auto">
           {TIMEFRAMES.map((tf) => (
             <button
@@ -112,12 +109,10 @@ function DashboardInner() {
         </div>
       </div>
 
-      {/* ── Chart Panel ────────────────────────────────────────────────── */}
       <div className="rounded-xl border border-border bg-card p-2 sm:p-4">
         <PriceLineChart />
       </div>
 
-      {/* ── Stats Row ──────────────────────────────────────────────────── */}
       {tick && (
         <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-6">
           {[
@@ -141,7 +136,6 @@ function DashboardInner() {
         </div>
       )}
 
-      {/* ── Market Grid ────────────────────────────────────────────────── */}
       <MarketGrid />
     </div>
   );

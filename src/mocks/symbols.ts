@@ -1,11 +1,10 @@
 import type { SymbolConfig } from "@/types/market";
 
 /**
- * 50 mock symbols spanning crypto, forex, and commodities.
- * Each has a base price and annual volatility for the GBM simulator.
+ * 50 instruments across crypto, forex, and commodities.
+ * `basePrice` seeds the GBM simulator; `volatility` is annualized σ.
  */
 export const SYMBOLS: SymbolConfig[] = [
-  // ── Major Crypto ──────────────────────────────────────────────────────────
   { symbol: "BTC/USD",  name: "Bitcoin",        basePrice: 97_420.50, volatility: 0.65, icon: "₿", category: "crypto" },
   { symbol: "ETH/USD",  name: "Ethereum",       basePrice: 3_285.30,  volatility: 0.72, icon: "Ξ", category: "crypto" },
   { symbol: "SOL/USD",  name: "Solana",         basePrice: 198.45,    volatility: 0.85, icon: "◎", category: "crypto" },
@@ -26,7 +25,6 @@ export const SYMBOLS: SymbolConfig[] = [
   { symbol: "SUI/USD",  name: "Sui",            basePrice: 3.52,      volatility: 0.88, icon: "💧", category: "crypto" },
   { symbol: "DOGE/USD", name: "Dogecoin",       basePrice: 0.32,      volatility: 0.90, icon: "🐕", category: "crypto" },
   { symbol: "SHIB/USD", name: "Shiba Inu",      basePrice: 0.000022,  volatility: 0.95, icon: "🐾", category: "crypto" },
-  // ── DeFi / Alt Crypto ─────────────────────────────────────────────────────
   { symbol: "AAVE/USD", name: "Aave",           basePrice: 285.40,    volatility: 0.75, icon: "👻", category: "crypto" },
   { symbol: "MKR/USD",  name: "Maker",          basePrice: 1_850.00,  volatility: 0.68, icon: "Ⓜ", category: "crypto" },
   { symbol: "CRV/USD",  name: "Curve",          basePrice: 0.88,      volatility: 0.82, icon: "🔄", category: "crypto" },
@@ -37,7 +35,6 @@ export const SYMBOLS: SymbolConfig[] = [
   { symbol: "RENDER/USD",name: "Render",        basePrice: 7.85,      volatility: 0.82, icon: "🎨", category: "crypto" },
   { symbol: "FET/USD",  name: "Fetch.ai",       basePrice: 2.35,      volatility: 0.85, icon: "🤖", category: "crypto" },
   { symbol: "PEPE/USD", name: "Pepe",           basePrice: 0.0000125, volatility: 0.98, icon: "🐸", category: "crypto" },
-  // ── Forex ─────────────────────────────────────────────────────────────────
   { symbol: "EUR/USD",  name: "Euro",           basePrice: 1.0842,    volatility: 0.08, icon: "€",  category: "forex" },
   { symbol: "GBP/USD",  name: "British Pound",  basePrice: 1.2635,    volatility: 0.09, icon: "£",  category: "forex" },
   { symbol: "USD/JPY",  name: "Japanese Yen",   basePrice: 150.25,    volatility: 0.10, icon: "¥",  category: "forex" },
@@ -48,7 +45,6 @@ export const SYMBOLS: SymbolConfig[] = [
   { symbol: "EUR/GBP",  name: "Euro/Pound",     basePrice: 0.8580,    volatility: 0.07, icon: "€£", category: "forex" },
   { symbol: "EUR/JPY",  name: "Euro/Yen",       basePrice: 162.85,    volatility: 0.10, icon: "€¥", category: "forex" },
   { symbol: "GBP/JPY",  name: "Pound/Yen",      basePrice: 189.90,    volatility: 0.12, icon: "£¥", category: "forex" },
-  // ── Commodities ───────────────────────────────────────────────────────────
   { symbol: "XAU/USD",  name: "Gold",           basePrice: 2_635.50,  volatility: 0.15, icon: "🥇", category: "commodity" },
   { symbol: "XAG/USD",  name: "Silver",         basePrice: 30.85,     volatility: 0.22, icon: "🥈", category: "commodity" },
   { symbol: "WTI/USD",  name: "Crude Oil WTI",  basePrice: 72.40,     volatility: 0.30, icon: "🛢", category: "commodity" },

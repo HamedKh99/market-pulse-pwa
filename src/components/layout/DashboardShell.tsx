@@ -8,11 +8,10 @@ import { SymbolSidebar } from "./SymbolSidebar";
 import { StatusBar } from "./StatusBar";
 
 /**
- * DashboardShell — The main application layout.
- * Responsive behavior:
- *   - Desktop (>1024px): sidebar permanent, main content fills remaining space
- *   - Tablet (768-1024): sidebar as overlay, toggleable
- *   - Mobile (<768px): sidebar as full-width overlay, auto-closes on symbol select
+ * DashboardShell — Responsive layout shell implementing a collapsible
+ * sidebar pattern across three breakpoints (mobile overlay / tablet
+ * overlay / desktop permanent). Auto-collapses on narrow viewports
+ * to avoid obstructing the primary data surface.
  */
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const isMobile = useMediaQuery("(max-width: 767px)");
@@ -20,12 +19,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const sidebarOpen = useStore((s) => s.sidebarOpen);
   const toggleSidebar = useStore((s) => s.toggleSidebar);
 
-  // Auto-close sidebar on mobile/tablet breakpoints
+  // Collapse sidebar when the viewport shrinks past the tablet breakpoint.
+  // Intentionally omits sidebarOpen from deps — we only react to breakpoint transitions.
   useEffect(() => {
     if (isMobile || isTablet) {
       if (sidebarOpen) toggleSidebar();
     }
-    // Only run when breakpoint changes, not on sidebarOpen change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile, isTablet]);
 
@@ -33,7 +32,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen flex-col bg-background transition-theme">
       <Header />
       <div className="relative flex flex-1 overflow-hidden">
-        {/* Sidebar overlay backdrop for mobile/tablet */}
         {sidebarOpen && (isMobile || isTablet) && (
           <div
             className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm lg:hidden"
@@ -42,7 +40,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           />
         )}
 
-        {/* Sidebar */}
         <div
           className={
             isMobile || isTablet
@@ -55,7 +52,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <SymbolSidebar isMobile={isMobile} />
         </div>
 
-        {/* Main content */}
         <main className="flex-1 overflow-y-auto p-3 sm:p-4">
           {children}
         </main>

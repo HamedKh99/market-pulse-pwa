@@ -5,9 +5,12 @@ import { useStore } from "@/store";
 import { LoginForm } from "./LoginForm";
 
 /**
- * AuthGate — wraps protected content.
- * Shows a loading spinner during hydration, the login form if
- * unauthenticated, or children if authenticated.
+ * AuthGate — Client-side route guard.
+ *
+ * Hydrates session state from `localStorage` on mount, then renders
+ * one of three states: loading spinner → login form → protected children.
+ * Keeps auth checks out of the server component tree so the app shell
+ * can still be statically cached by the service worker.
  */
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useStore((s) => s.isAuthenticated);
@@ -18,7 +21,6 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     hydrate();
   }, [hydrate]);
 
-  // Hydrating auth from localStorage
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -45,11 +47,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Not authenticated — show login
   if (!isAuthenticated) {
     return <LoginForm />;
   }
 
-  // Authenticated — render dashboard
   return <>{children}</>;
 }

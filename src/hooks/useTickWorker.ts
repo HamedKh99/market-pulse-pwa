@@ -6,10 +6,18 @@ import type { MainToWorkerMessage, WorkerToMainMessage } from "@/workers/protoco
 import type { RawTick, Timeframe } from "@/types/market";
 
 /**
- * Manages the Web Worker lifecycle.
- * - Spawns the tickProcessor Worker on mount
- * - Provides a `sendTick` callback for the Socket hook to push ticks
- * - Listens for batched updates from the Worker and writes them to Zustand
+ * Bridge between the React lifecycle and the `tickProcessor` Web Worker.
+ *
+ * Spawns the Worker on mount and tears it down on unmount. Exposes
+ * fire-and-forget `sendTick` / `sendBatchTicks` callbacks that the
+ * DataProvider calls on every socket event — no main-thread parsing.
+ *
+ * Inbound `BATCH_UPDATE` messages (throttled to ~60 FPS inside the Worker)
+ * are funnelled straight into Zustand, giving React a single re-render
+ * trigger per animation frame.
+ *
+ * @returns Stable callbacks for pushing data into the Worker, plus a
+ *          `isReady` ref consumers can check before sending messages.
  */
 export function useTickWorker() {
   const workerRef = useRef<Worker | null>(null);
@@ -19,14 +27,14 @@ export function useTickWorker() {
   const updateSparklines = useStore((s) => s.updateSparklines);
 
   useEffect(() => {
-    // Spawn Web Worker using relative path (Turbopack resolves this)
+    // `new URL(…, import.meta.url)` lets Turbopack / Webpack resolve
+    // the Worker entry point at build time with full TS support.
     const worker = new Worker(
       new URL("../workers/tickProcessor.worker.ts", import.meta.url)
     );
 
     workerRef.current = worker;
 
-    // Listen for batched updates from the Worker
     worker.onmessage = (event: MessageEvent<WorkerToMainMessage>) => {
       const msg = event.data;
 
@@ -57,25 +65,25 @@ export function useTickWorker() {
     };
   }, [updatePrices, updateCandles, updateSparklines]);
 
-  /** Send a single tick to the Worker. */
+  /** Forward a single raw tick to the Worker for off-thread processing. */
   const sendTick = useCallback((tick: RawTick) => {
     const msg: MainToWorkerMessage = { type: "TICK", payload: tick };
     workerRef.current?.postMessage(msg);
   }, []);
 
-  /** Send a batch of ticks to the Worker. */
+  /** Forward a pre-batched array when the server sends burst payloads. */
   const sendBatchTicks = useCallback((ticks: RawTick[]) => {
     const msg: MainToWorkerMessage = { type: "BATCH_TICKS", payload: ticks };
     workerRef.current?.postMessage(msg);
   }, []);
 
-  /** Change the active timeframe in the Worker. */
+  /** Notify the Worker of a timeframe change so it can reset candle state. */
   const setWorkerTimeframe = useCallback((tf: Timeframe) => {
     const msg: MainToWorkerMessage = { type: "SET_TIMEFRAME", payload: tf };
     workerRef.current?.postMessage(msg);
   }, []);
 
-  /** Initialize Worker with snapshot data. */
+  /** Seed the Worker with the initial server snapshot for instant first paint. */
   const initSnapshot = useCallback(
     (data: Record<string, { price: number; volume24h: number; change24h: number; high24h: number; low24h: number }>) => {
       const msg: MainToWorkerMessage = { type: "INIT_SNAPSHOT", payload: data };
