@@ -2,8 +2,7 @@
 
 import { createColumnHelper } from "@tanstack/react-table";
 import type { TickData } from "@/types/market";
-import type { SymbolConfig } from "@/types/market";
-import { formatPrice, formatPercent, formatVolume } from "@/lib/formatters";
+import { formatPercent, formatVolume } from "@/lib/formatters";
 import { PriceCell } from "./PriceCell";
 import { MiniSparkline } from "@/components/charts/MiniSparkline";
 import { cn } from "@/lib/cn";

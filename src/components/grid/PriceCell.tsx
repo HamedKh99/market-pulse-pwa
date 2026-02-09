@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/cn";
 import { formatPrice } from "@/lib/formatters";
 
@@ -12,32 +12,35 @@ interface PriceCellProps {
 /**
  * PriceCell — CSS-animation-driven flash indicator for price changes.
  *
- * Avoids React re-render storms: instead of toggling a state boolean
- * that would propagate through the entire virtualized row, we apply a
- * one-shot CSS class (`flash-up` / `flash-down`) and clear it after
- * the 600 ms animation completes. This keeps the per-frame React
- * work limited to a single `className` mutation on the DOM node.
+ * Avoids React re-render storms: instead of toggling state we mutate
+ * the DOM node's classList directly, applying a one-shot CSS class
+ * (`flash-up` / `flash-down`) and removing it after the 600 ms
+ * animation completes. This keeps the per-frame React work to zero
+ * extra reconciliation passes.
  */
 export function PriceCell({ price, previousDirection = "neutral" }: PriceCellProps) {
   const prevPriceRef = useRef(price);
-  const [flashClass, setFlashClass] = useState("");
+  const spanRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (price !== prevPriceRef.current) {
-      const direction = price > prevPriceRef.current ? "up" : "down";
-      setFlashClass(direction === "up" ? "flash-up" : "flash-down");
-      prevPriceRef.current = price;
+    const el = spanRef.current;
+    if (!el || price === prevPriceRef.current) return;
 
-      const timer = setTimeout(() => setFlashClass(""), 600);
-      return () => clearTimeout(timer);
-    }
+    const cls = price > prevPriceRef.current ? "flash-up" : "flash-down";
+    el.classList.add(cls);
+    prevPriceRef.current = price;
+
+    const timer = setTimeout(() => {
+      el.classList.remove("flash-up", "flash-down");
+    }, 600);
+    return () => clearTimeout(timer);
   }, [price]);
 
   return (
     <span
+      ref={spanRef}
       className={cn(
         "inline-block rounded px-1.5 py-0.5 font-mono text-xs font-medium tabular-nums",
-        flashClass,
         previousDirection === "up"
           ? "text-success"
           : previousDirection === "down"

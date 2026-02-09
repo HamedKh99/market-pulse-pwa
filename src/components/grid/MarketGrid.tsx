@@ -64,6 +64,7 @@ export function MarketGrid() {
     [isMobile]
   );
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table returns unmemoizable functions by design; compiler already skips this component.
   const table = useReactTable({
     data,
     columns,

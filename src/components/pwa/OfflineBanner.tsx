@@ -14,13 +14,18 @@ export function OfflineBanner() {
 
   useEffect(() => {
     if (!isOnline) {
-      setCacheAge(getCacheAge());
       const interval = setInterval(() => setCacheAge(getCacheAge()), 5000);
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(interval);
+        setCacheAge(null);
+      };
     }
   }, [isOnline]);
 
   if (isOnline) return null;
+
+  // Derive initial cache age during render; polled updates come from the interval.
+  const displayAge = cacheAge ?? getCacheAge();
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-2 bg-warning px-4 py-1.5 text-center shadow-md">
@@ -43,7 +48,7 @@ export function OfflineBanner() {
       </svg>
       <span className="text-xs font-medium text-black">
         You&apos;re offline
-        {cacheAge ? ` — showing data from ${cacheAge}` : " — displaying last cached data"}
+        {displayAge ? ` — showing data from ${displayAge}` : " — displaying last cached data"}
       </span>
     </div>
   );

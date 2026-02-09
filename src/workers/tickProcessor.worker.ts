@@ -52,8 +52,8 @@ interface SymbolState {
   dirty: boolean;
 }
 
-let symbolStates = new Map<string, SymbolState>();
-let subscribedSymbols = new Set<string>();
+const symbolStates = new Map<string, SymbolState>();
+const subscribedSymbols = new Set<string>();
 let activeTimeframe: Timeframe = "1m";
 let lastEmitTime = 0;
 
