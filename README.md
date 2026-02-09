@@ -12,7 +12,7 @@
 ![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?logo=pwa)
 
 <p align="center">
-  <img src="./public/screenshots/preview.jpg" alt="Market Pulse Dashboard" width="900" />
+  <img src="./public/screenshots/preview.png" alt="Market Pulse Dashboard" width="900" />
 </p>
 
 ---
